@@ -1,6 +1,7 @@
 package notifiers
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/grafana/grafana/pkg/bus"
@@ -111,6 +112,11 @@ func (vn *VictoropsNotifier) Notify(evalContext *alerting.EvalContext) error {
 	bodyJSON.Set("monitoring_tool", "Grafana v"+setting.BuildVersion)
 	bodyJSON.Set("alert_url", ruleURL)
 	bodyJSON.Set("metrics", fields)
+
+	for index, evt := range evalContext.EvalMatches {
+		bodyJSON.Set("metricName"+strconv.Itoa(index), evt.Metric)
+		bodyJSON.Set("metricValue"+strconv.Itoa(index), evt.Value)
+	}
 
 	if evalContext.Error != nil {
 		bodyJSON.Set("error_message", evalContext.Error.Error())
